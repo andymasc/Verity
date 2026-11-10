@@ -4,9 +4,11 @@ Neon suspends idle computes ("scale to zero") and its pooled endpoint
 (PgBouncer) recycles connections, so a connection attempt can be dropped
 mid-handshake with "server closed the connection unexpectedly" or "SSL
 connection has been closed unexpectedly". The compute wakes in a few hundred
-milliseconds and the next attempt succeeds. This backend retries exactly those
-transient messages with short backoff; all other errors (bad password, TLS
-failure, ...) still raise immediately.
+milliseconds and the next attempt succeeds. Resolving the pooler hostname can
+also fail briefly with "Temporary failure in name resolution" (EAI_AGAIN).
+This backend retries exactly those transient messages with short backoff; all
+other errors (bad password, unknown hostname, TLS failure, ...) still raise
+immediately.
 """
 
 import time
@@ -19,6 +21,7 @@ _TRANSIENT_MARKERS = (
     "connection reset by peer",
     "connection terminated by the server",
     "ending connection because it has been idle",
+    "Temporary failure in name resolution",
 )
 
 _MAX_ATTEMPTS = 3
